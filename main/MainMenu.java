@@ -153,16 +153,40 @@ public class MainMenu {
 
     private static void checkout() {
         try {
-            cart.displayCart();
+            if (cart.getItems().isEmpty()) {
+                throw new EmptyCartException("Your shopping cart is empty.");
+            }
+            
             double total = cart.getSubtotal();
+            
+            System.out.println("\n=====================================================");
+            System.out.println("                   ORDER RECEIPT");
+            System.out.println("=====================================================");
+            System.out.println("Date: " + java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
             System.out.println("-----------------------------------------------------");
-            System.out.printf("TOTAL BILL: $%.2f\n", total);
+            System.out.printf("%-30s %-10s %s\n", "ITEM", "QTY", "TOTAL");
+            System.out.println("-----------------------------------------------------");
+            
+            for (java.util.Map.Entry<MenuItem, Integer> entry : cart.getItems().entrySet()) {
+                MenuItem item = entry.getKey();
+                int qty = entry.getValue();
+                double cost = item.getPrice() * qty;
+                System.out.printf("%-30s x%-9d $%.2f\n", item.getName(), qty, cost);
+            }
+            
+            System.out.println("-----------------------------------------------------");
+            System.out.printf("%-41s $%.2f\n", "SUBTOTAL:", total);
+            System.out.printf("%-41s $%.2f\n", "TAX (0%):", 0.00);
+            System.out.println("-----------------------------------------------------");
+            System.out.printf("%-41s $%.2f\n", "TOTAL AMOUNT PAID:", total);
+            System.out.println("=====================================================");
             
             orderDAO.saveOrder(cart, total);
-            System.out.println("Order processed and saved to database successfully!");
+            System.out.println("\n>>> Order processed and saved to database successfully! <<<");
+            
             cart.clear();
         } catch (EmptyCartException e) {
-            System.out.println("Cannot checkout. " + e.getMessage());
+            System.out.println("\nCannot checkout. " + e.getMessage());
         }
     }
 }
