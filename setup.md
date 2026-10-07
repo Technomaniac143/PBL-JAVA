@@ -15,18 +15,25 @@ Open your terminal (Command Prompt or PowerShell) at the root of the `java proje
 
 ```powershell
 # Windows (PowerShell)
-Get-ChildItem -Recurse *.java | Where-Object { $_.FullName -notmatch "\\frontend\\" } | ForEach-Object { $_.FullName } > sources.txt
-javac -d out @sources.txt
+(Get-ChildItem -Recurse src/*.java).FullName | Out-File -FilePath sources.txt -Encoding utf8
+javac -d out -cp "lib/mysql-connector-j-8.3.0.jar" (Get-Content sources.txt)
 ```
 
 ### Execution:
-Once compiled, you can run the `MainMenu` class, which serves as the entry point to your CLI application:
+Once compiled, you can run the application using any of the following commands:
 
 ```powershell
+# Option A: Run executable JAR directly (Recommended)
+java -jar App.jar
+
+# Option B: Run via out directory
 java -cp out com.orderprocessing.main.MainMenu
+
+# Option C: Run specifying lib JAR
+java -cp "out;lib/mysql-connector-j-8.3.0.jar" com.orderprocessing.main.MainMenu
 ```
 
-*Note: If you run this and get a JDBC Driver error, it means you need to download the `mysql-connector-java.jar` and include it in your classpath (`java -cp "out;mysql-connector-java.jar" com.orderprocessing.main.MainMenu`). For the scope of the PBL demo, the application catches the SQLException and continues seamlessly.*
+*Note: The MySQL JDBC driver (`com.mysql.cj.jdbc.Driver`) is embedded and automatically registered. If a local MySQL server is active on `localhost:3306`, orders persist directly to database `food_db`. If MySQL server is offline, the application seamlessly operates in simulated database mode for PBL presentation.*
 
 ---
 
